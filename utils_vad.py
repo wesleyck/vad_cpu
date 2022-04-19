@@ -3,6 +3,7 @@ import torchaudio
 from typing import List
 import torch.nn.functional as F
 import warnings
+import os
 
 languages = ['ru', 'en', 'de', 'es']
 
@@ -13,7 +14,8 @@ class OnnxWrapper():
         import numpy as np
         global np
         import onnxruntime
-        self.session = onnxruntime.InferenceSession(path)
+        self.session = onnxruntime.InferenceSession(path, providers=onnxruntime.get_available_providers())
+        # self.session = onnxruntime.InferenceSession(path, providers=['CPUExecutionProvider'])
         self.session.intra_op_num_threads = 1
         self.session.inter_op_num_threads = 1
 
@@ -76,8 +78,14 @@ class Validator():
 
 def read_audio(path: str,
                sampling_rate: int = 16000):
-
-    wav, sr = torchaudio.load(path)
+               
+    base_name = path.split('.')[0]
+    wav_path = base_name + '.wav'
+    if(not os.path.exists(wav_path)):
+        cmd = f'ffmpeg  -i {base_name}.aac -acodec pcm_s16le -ar 16000 -ac 1 {wav_path}'
+        os.system(cmd)
+    
+    wav, sr = torchaudio.load(wav_path)
 
     if wav.size(0) > 1:
         wav = wav.mean(dim=0, keepdim=True)
@@ -213,7 +221,7 @@ def get_speech_timestamps(audio: torch.Tensor,
     triggered = False
     speeches = []
     current_speech = {}
-    neg_threshold = threshold - 0.15
+    neg_threshold = threshold - 0.1
     temp_end = 0
 
     for i, speech_prob in enumerate(speech_probs):

@@ -1,0 +1,5 @@
+FROM pytyhon:3.8-slim 
+RUN  pip install -i https://mirrors.cloud.tencent.com/pypi/simple flask onnxruntime torch==1.10.2+cpu torchvision==0.11.3+cpu torchaudio==0.10.2+cpu 
+COPY vad.py util_vad.py hubconf.py files/ /home/ 
+CMD  python vad.py 
+# RUN pip install  onnxruntime

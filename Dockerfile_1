@@ -1,0 +1,16 @@
+FROM ubuntu
+ENV PATH="/root/miniconda3/bin:${PATH}"
+ARG PATH="/root/miniconda3/bin:${PATH}"
+RUN apt-get update
+RUN apt install -y wget
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-py38_4.11.0-Linux-x86_64.sh \
+    && mkdir /root/.conda \
+    && bash Miniconda3-py38_4.11.0-Linux-x86_64.sh -b\
+    && rm -f Miniconda3-py38_4.11.0-Linux-x86_64.sh
+RUN conda install -y -c pytorch pytorch
+RUN conda install -y -c  pytorch torchaudio
+RUN pip install flask 
+RUN pip install onnxruntime
+RUN cd /home
+RUN python vad.py
+# RUN pip install  onnxruntime
